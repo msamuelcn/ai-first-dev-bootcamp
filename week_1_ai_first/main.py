@@ -1,34 +1,26 @@
+from datetime import date
+
 from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
-# 1. Create an instance of FastAPI
-app = FastAPI()
-
-
-# 2. Define a "path operation" (route)
-@app.post("/workouts")
-def create_workout():
-    # 3. Return a dictionary (automatically converted to JSON)
-    return {"message": "POST: Welcome to my workouts!"}
+app = FastAPI(title="Workout Tracker API")
 
 
-@app.get("/workouts")
-def list_workout():
-    return {"message": "GET: Welcome to my workouts!"}
+class WorkoutBase(BaseModel):
+    workout_type: str = Field(..., min_length=1)
+    distance_km: float = Field(..., gt=0)
+    duration_minutes: int = Field(..., gt=0)
+    workout_date: date
 
 
-# GET    /events/{id}
-@app.get("/workouts/{id}")
-def get_workout(id: int):
-    return {"message": f"GET: Welcome to workout: {id}!"}
+class WorkoutCreate(WorkoutBase):
+    pass
 
 
-# PUT    /workouts/{id}
-@app.put("/workouts/{id}")
-def update_workout(id: int):
-    return {"message": f"PUT: Welcome to workout: {id}!"}
+class Workout(WorkoutBase):
+    id: int
 
 
-# DELETE /workouts/{id}
-@app.delete("/workouts/{id}")
-def delete_workout(id: int):
-    return {"message": f"DELETE: Welcome to workout: {id}!"}
+@app.get("/")
+def health_check() -> dict[str, str]:
+    return {"status": "ok"}
