@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+import os
+import uvicorn
 
 from app.models import Workout, WorkoutCreate, WorkoutUpdate
 
@@ -72,3 +74,8 @@ def delete_workout(id: int) -> dict[str, str]:
 
     del workouts[id]
     return {"message": "Workout deleted successfully"}
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
