@@ -26,6 +26,7 @@ def setup_function() -> None:
 
 # POST /workouts
 
+
 def test_create_workout_returns_201_and_payload() -> None:
     response = client.post("/workouts", json=VALID_PAYLOAD)
 
@@ -49,6 +50,7 @@ def test_create_workout_invalid_payload_returns_400() -> None:
 
 # GET /workouts
 
+
 def test_list_workouts_returns_200_with_all_workouts() -> None:
     _create_workout()
     _create_workout({**VALID_PAYLOAD, "workout_type": "Tempo Run"})
@@ -71,6 +73,7 @@ def test_list_workouts_returns_empty_list_when_none_exist() -> None:
 
 # GET /workouts/{id}
 
+
 def test_get_workout_by_id_returns_200() -> None:
     created = _create_workout()
 
@@ -87,6 +90,7 @@ def test_get_workout_by_id_returns_404_when_missing() -> None:
 
 
 # PUT /workouts/{id}
+
 
 def test_update_workout_returns_200_and_updated_payload() -> None:
     created = _create_workout()
@@ -121,6 +125,7 @@ def test_update_workout_invalid_payload_returns_400() -> None:
 
 # DELETE /workouts/{id}
 
+
 def test_delete_workout_returns_200() -> None:
     created = _create_workout()
 
@@ -137,6 +142,7 @@ def test_delete_workout_returns_404_when_missing() -> None:
 
 
 # Validation rules
+
 
 def test_validation_workout_type_required() -> None:
     payload = {
@@ -163,6 +169,8 @@ def test_validation_duration_must_be_positive() -> None:
 
 
 def test_validation_workout_date_must_be_valid() -> None:
-    response = client.post("/workouts", json={**VALID_PAYLOAD, "workout_date": "bad-date"})
+    response = client.post(
+        "/workouts", json={**VALID_PAYLOAD, "workout_date": "bad-date"}
+    )
 
     assert response.status_code == 400
