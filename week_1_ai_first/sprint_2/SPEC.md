@@ -214,7 +214,7 @@ An AI_LOG.md file will contain:
 ```
 project/
 │
-├── codeinsight/
+├── code-insight/
 │   ├── main.py
 │   ├── commands/
 │   ├── mcp/
