@@ -27,34 +27,46 @@ def handle(args: argparse.Namespace) -> None:
         with client:
             listing = client.list_directory(args.path)
         print(_render_tree(listing))
-    except ValueError:
-        print(
-            f"Error: Invalid path format: {args.path}. Please provide a valid path and try again."
+    except Exception as exc:
+        print(_format_tree_error(args.path, exc))
+
+
+def _format_tree_error(path: str, error: Exception) -> str:
+    """Convert internal failures into user-friendly tree command errors."""
+    if isinstance(error, ValueError):
+        return (
+            f"Error: Invalid path format: {path}. Please provide a valid path and try again. "
+            "Examples: . , ./src , C:/projects/code-insight"
         )
-    except FileNotFoundError:
-        print(
-            f"Error: Path not found: {args.path}. Please check the path and try again."
+
+    if isinstance(error, FileNotFoundError):
+        return f"Error: Path not found: {path}. Please check the path and try again."
+
+    if isinstance(error, NotADirectoryError):
+        return f"Error: Path not found: {path}. Please provide a directory path and try again."
+
+    if isinstance(error, PermissionError):
+        return (
+            f"Error: Permission denied when accessing: {path}. "
+            "Please check your permissions and try again."
         )
-    except NotADirectoryError:
-        print(
-            f"Error: Path not found: {args.path}. Please check the path and try again."
+
+    if isinstance(error, MCPConnectionError):
+        return (
+            "Error: Unable to connect to MCP server. "
+            "Please ensure the server is running and try again."
         )
-    except PermissionError:
-        print(
-            f"Error: Permission denied when accessing: {args.path}. Please check your permissions and try again."
+
+    if isinstance(error, MCPOperationError):
+        return (
+            "Error: MCP operation failed: unable to display directory tree. "
+            "Please check your MCP connection and try again."
         )
-    except MCPConnectionError:
-        print(
-            "Error: Unable to connect to MCP server. Please ensure the server is running and try again."
-        )
-    except MCPOperationError as exc:
-        print(
-            f"Error: MCP operation failed: {exc}. Please check your MCP connection and try again."
-        )
-    except Exception:
-        print(
-            "Error: MCP operation failed: unable to display directory tree. Please check your MCP connection and try again."
-        )
+
+    return (
+        "Error: Unable to display directory tree right now. "
+        "Please verify the path and MCP setup, then try again."
+    )
 
 
 def _render_tree(listing: Any) -> str:
