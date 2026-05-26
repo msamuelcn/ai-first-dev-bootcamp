@@ -178,6 +178,19 @@ The system should:
  - MCP Errors: "Error: MCP operation failed: <error message>. Please check your MCP connection and try again."
  - MCP Connection Failure: "Error: Unable to connect to MCP server. Please ensure the server is running and try again."
  - Empty File: "Error: File is empty and cannot be summarized: <file>. Please provide a valid file for analysis."
+ - Permission Denied: "Error: Permission denied when accessing: <path>. Please check your permissions and try again."
+ - Invalid Path Format: "Error: Invalid path format: <path>. Please provide a valid path and try again."
+
+# Output Requirements
+Define:
+ - clean CLI output
+ - structured formatting
+ - clear error messages
+
+# Constraints
+ - max 5 commands
+ - no external APIs (unless required)
+ - must use MCP for at least 1 core feature
 
 # AI Development Workflow
 The project will follow an AI-first workflow:
