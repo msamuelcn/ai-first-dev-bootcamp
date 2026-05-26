@@ -11,6 +11,32 @@ from .client import MCPClient, MCPConnectionSettings
 class LocalFilesystemTransport:
     """Simple local transport used to adapt filesystem access through MCP client APIs."""
 
+    _BINARY_EXTENSIONS = {
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".webp",
+        ".bmp",
+        ".ico",
+        ".pdf",
+        ".zip",
+        ".gz",
+        ".tar",
+        ".7z",
+        ".exe",
+        ".dll",
+        ".so",
+        ".bin",
+        ".dat",
+        ".mp3",
+        ".wav",
+        ".mp4",
+        ".mov",
+        ".avi",
+        ".pyc",
+    }
+
     def open(self, settings: MCPConnectionSettings) -> None:
         """Open the transport connection."""
 
@@ -19,10 +45,13 @@ class LocalFilesystemTransport:
 
     def call_tool(self, tool_name: str, arguments: dict[str, Any]) -> Any:
         """Execute a filesystem tool request."""
-        if tool_name != "list_directory":
-            raise ValueError(f"Unsupported tool: {tool_name}")
+        if tool_name == "list_directory":
+            return self._list_directory(arguments["path"])
 
-        return self._list_directory(arguments["path"])
+        if tool_name == "read_file":
+            return self._read_file(arguments["path"])
+
+        raise ValueError(f"Unsupported tool: {tool_name}")
 
     def _list_directory(self, path: str) -> dict[str, Any]:
         """Return a recursive directory listing for a path."""
@@ -67,6 +96,61 @@ class LocalFilesystemTransport:
             entries.append(entry)
 
         return entries
+
+    def _read_file(self, path: str) -> dict[str, Any]:
+        """Return a file payload for summarize/explain style commands."""
+        if not isinstance(path, str) or not path.strip():
+            raise ValueError("Invalid path format")
+
+        try:
+            file_path = Path(path).expanduser()
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Invalid path format") from exc
+
+        if not file_path.exists():
+            raise FileNotFoundError(path)
+
+        if file_path.is_dir():
+            raise IsADirectoryError(path)
+
+        raw = file_path.read_bytes()
+        extension = file_path.suffix.lower()
+
+        if extension in self._BINARY_EXTENSIONS or self._looks_binary(raw):
+            return {
+                "path": str(file_path),
+                "content": "",
+                "extension": extension,
+                "is_binary": True,
+                "size_bytes": len(raw),
+                "line_count": 0,
+            }
+
+        content = raw.decode("utf-8")
+
+        return {
+            "path": str(file_path),
+            "content": content,
+            "extension": extension,
+            "is_binary": False,
+            "size_bytes": len(raw),
+            "line_count": content.count("\n") + (1 if content else 0),
+        }
+
+    @staticmethod
+    def _looks_binary(raw: bytes) -> bool:
+        """Heuristic binary detector for unknown file extensions."""
+        if not raw:
+            return False
+
+        if b"\x00" in raw:
+            return True
+
+        try:
+            raw.decode("utf-8")
+            return False
+        except UnicodeDecodeError:
+            return True
 
 
 class FilesystemMCPClient(MCPClient):
