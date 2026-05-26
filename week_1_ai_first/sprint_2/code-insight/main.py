@@ -4,9 +4,9 @@ from cli import run
 
 
 def main() -> int:
-	"""Run the CLI application."""
-	return run()
+    """Run the CLI application."""
+    return run()
 
 
 if __name__ == "__main__":
-	raise SystemExit(main())
+    raise SystemExit(main())
