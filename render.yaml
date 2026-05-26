@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: workout-tracker-api
+    env: python
+    rootDir: week_1_ai_first
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT

@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import os
 import uvicorn
 
-from app.models import Workout, WorkoutCreate, WorkoutUpdate
+from week_1_ai_first.sprint_1.app.models import Workout, WorkoutCreate, WorkoutUpdate
 
 app = FastAPI(title="Workout Tracker API")
 
@@ -78,4 +78,4 @@ def delete_workout(id: int) -> dict[str, str]:
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)
