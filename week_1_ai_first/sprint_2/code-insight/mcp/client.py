@@ -94,6 +94,8 @@ class MCPClient:
             return self._transport.call_tool(tool_name=tool_name, arguments=arguments)
         except MCPClientError:
             raise
+        except (FileNotFoundError, NotADirectoryError, PermissionError, ValueError):
+            raise
         except Exception as exc:  # pragma: no cover - defensive wrapper
             raise MCPOperationError(f"MCP operation failed: {exc}") from exc
 
