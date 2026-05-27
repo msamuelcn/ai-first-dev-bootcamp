@@ -187,18 +187,20 @@ def _build_flow_summary(
     lower_content = content.lower()
 
     if extension == ".py":
-        has_main_guard = "if __name__ == \"__main__\"" in content
+        has_main_guard = 'if __name__ == "__main__"' in content
         if has_main_guard and functions:
-            return (
-                f"Defines reusable units, then enters execution through the main guard, likely invoking {functions[0]}."
-            )
+            return f"Defines reusable units, then enters execution through the main guard, likely invoking {functions[0]}."
         if classes and functions:
             return "Defines classes and helper functions, then orchestrates behavior through function calls."
         if functions:
             return "Defines functions and executes logic by calling them in sequence."
         return "Runs module-level logic with minimal explicit function structure."
 
-    if "router" in lower_content or "route" in lower_content or "endpoint" in lower_content:
+    if (
+        "router" in lower_content
+        or "route" in lower_content
+        or "endpoint" in lower_content
+    ):
         return "Declares handlers/routes and processes inputs through those handlers."
 
     if functions or classes:
