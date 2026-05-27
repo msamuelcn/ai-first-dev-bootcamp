@@ -56,10 +56,10 @@ pip install -r requirements.txt
 
 ## Usage
 
-Run commands from inside the code-insight folder:
+Run commands from inside the codeinsight folder:
 
 ```bash
-cd code-insight
+cd codeinsight
 python main.py --help
 ```
 

@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codeinsight-cli"
+version = "0.1.0"
+description = "Code Insight CLI launcher"
+requires-python = ">=3.10"
+
+[project.scripts]
+codeinsight = "code_insight_cli:main"
+
+[tool.setuptools]
+py-modules = ["code_insight_cli"]

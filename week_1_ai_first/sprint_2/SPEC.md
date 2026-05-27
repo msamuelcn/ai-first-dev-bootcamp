@@ -67,7 +67,7 @@ The MCP server will provide:
 ## 1. analyze
 ### Command
 ```bash
-code-insight analyze <path>
+codeinsight analyze <path>
 ```
 ### Description
 Analyzes a directory structure and outputs:
@@ -78,13 +78,13 @@ Analyzes a directory structure and outputs:
 
 ### Example
 ```bash
-code-insight analyze /path/to/project
+codeinsight analyze /path/to/project
 ```
 
 ## 2. summarize
 ### Command
 ```bash
-code-insight summarize <file>
+codeinsight summarize <file>
 ```
 ### Description
 Reads a file through MCP and outputs:
@@ -94,13 +94,13 @@ Reads a file through MCP and outputs:
 
 ### Example
 ```bash
-code-insight summarize /path/to/file
+codeinsight summarize /path/to/file
 ```
 
 ## 3. explain
 ### Command
 ```bash
-code-insight explain <file>
+codeinsight explain <file>
 ```
 ### Description
 Explains the purpose of a source code file in human-readable format.
@@ -110,13 +110,13 @@ Explains the purpose of a source code file in human-readable format.
 
 ### Example
 ```bash
-code-insight explain /path/to/file
+codeinsight explain /path/to/file
 ```
 
 ## 4. tree
 ### Command
 ```bash
-code-insight tree <path>
+codeinsight tree <path>
 ```
 ### Description
 Displays the directory structure of a project in a tree-like format.
@@ -127,13 +127,13 @@ Displays the directory structure of a project in a tree-like format.
 
 ### Example
 ```bash
-code-insight tree /path/to/project
+codeinsight tree /path/to/project
 ```
 
 ## 5. find-errors
 ### Command
 ```bash
-code-insight find-errors <path>
+codeinsight find-errors <path>
 ```
 ### Description
 Finds potential errors in a project by analyzing files and logs.
@@ -150,7 +150,7 @@ Outputs a summarized report.
 
 ### Example
 ```bash
-code-insight find-errors logs/app.log
+codeinsight find-errors logs/app.log
 ```
 
 # Functional Requirements
@@ -214,7 +214,7 @@ An AI_LOG.md file will contain:
 ```
 project/
 │
-├── code-insight/
+├── codeinsight/
 │   ├── main.py
 │   ├── commands/
 │   ├── mcp/

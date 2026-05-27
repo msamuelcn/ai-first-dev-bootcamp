@@ -11,7 +11,7 @@ from commands import analyze, explain, find_errors, summarize, tree
 def build_parser() -> argparse.ArgumentParser:
     """Build and return the top-level CLI parser."""
     parser = argparse.ArgumentParser(
-        prog="code-insight",
+        prog="codeinsight",
         description="Inspect projects and files through MCP-backed commands.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)

@@ -36,7 +36,7 @@ def _format_tree_error(path: str, error: Exception) -> str:
     if isinstance(error, ValueError):
         return (
             f"Error: Invalid path format: {path}. Please provide a valid path and try again. "
-            "Examples: . , ./src , C:/projects/code-insight"
+            "Examples: . , ./src , C:/projects/codeinsight"
         )
 
     if isinstance(error, FileNotFoundError):
