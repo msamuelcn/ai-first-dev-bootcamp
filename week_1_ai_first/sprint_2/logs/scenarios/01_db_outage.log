@@ -1,0 +1,7 @@
+2026-05-27 10:01:00 ERROR Database timeout on user lookup
+2026-05-27 10:01:01 WARNING Retry attempt 1
+2026-05-27 10:01:02 ERROR Database timeout on user lookup
+2026-05-27 10:01:03 WARNING Retry attempt 2
+2026-05-27 10:01:04 ERROR Database timeout on user lookup
+2026-05-27 10:01:05 Exception ServiceUnavailableException
+2026-05-27 10:01:06 ERROR Circuit breaker opened for db-primary

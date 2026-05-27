@@ -1,0 +1,5 @@
+2026-05-27 12:40:00 WARNING Cache miss for key=user:42
+2026-05-27 12:40:01 WARNING Cache miss for key=user:42
+2026-05-27 12:40:02 WARNING Cache miss for key=user:43
+2026-05-27 12:40:03 WARNING Slow query detected on endpoint /profile
+2026-05-27 12:40:04 WARNING Slow query detected on endpoint /profile

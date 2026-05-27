@@ -1,0 +1,5 @@
+# Runtime dependencies
+# Current CLI implementation uses Python standard library + local modules.
+
+# Test dependencies
+pytest>=8.0,<9.0
