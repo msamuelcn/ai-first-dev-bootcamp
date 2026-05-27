@@ -10,6 +10,11 @@ from pathlib import Path
 from mcp.client import MCPConnectionError, MCPOperationError
 from mcp.filesystem import create_local_filesystem_client
 
+_ERROR_RE = re.compile(r"\berror\b", re.IGNORECASE)
+_WARNING_RE = re.compile(r"\bwarning\b", re.IGNORECASE)
+_EXCEPTION_RE = re.compile(r"\bexception\b", re.IGNORECASE)
+_TRACEBACK_RE = re.compile(r"\btraceback\b", re.IGNORECASE)
+
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     """Register the find-errors command."""
@@ -90,22 +95,21 @@ def _scan_log_content(content: str) -> dict[str, object]:
     for line in lines:
         # Be defensive: malformed log lines should never abort scanning.
         try:
-            upper = line.upper()
-            if "ERROR" in upper:
+            has_error = bool(_ERROR_RE.search(line))
+            has_warning = bool(_WARNING_RE.search(line))
+            has_exception = bool(_EXCEPTION_RE.search(line))
+            has_traceback = bool(_TRACEBACK_RE.search(line))
+
+            if has_error:
                 counts["ERROR"] += 1
-            if "WARNING" in upper:
+            if has_warning:
                 counts["WARNING"] += 1
-            if "EXCEPTION" in upper:
+            if has_exception:
                 counts["EXCEPTION"] += 1
-            if "TRACEBACK" in upper:
+            if has_traceback:
                 counts["TRACEBACK"] += 1
 
-            if (
-                "ERROR" in upper
-                or "WARNING" in upper
-                or "EXCEPTION" in upper
-                or "TRACEBACK" in upper
-            ):
+            if has_error or has_warning or has_exception or has_traceback:
                 normalized = _normalize_issue_line(line)
                 if normalized:
                     issues[normalized] += 1
