@@ -3,8 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 import os
 import uvicorn
-
-from week_1_ai_first.sprint_1.app.models import Workout, WorkoutCreate, WorkoutUpdate
+from .models import Workout, WorkoutCreate, WorkoutUpdate
 
 app = FastAPI(title="Workout Tracker API")
 
