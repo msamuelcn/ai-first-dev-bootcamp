@@ -133,13 +133,13 @@ def _detect_project_type(client: Any, files: list[dict[str, Any]]) -> str:
 
 def _contains_fastapi_signal(client: Any, files: list[dict[str, Any]]) -> bool:
     """Check common files for FastAPI dependency/import hints via MCP read_file."""
-    if _contains_token(client, files, {"requirements.txt", "pyproject.toml"}, "fastapi"):
+    if _contains_token(
+        client, files, {"requirements.txt", "pyproject.toml"}, "fastapi"
+    ):
         return True
 
     py_files = [
-        entry
-        for entry in files
-        if str(entry.get("name", "")).lower().endswith(".py")
+        entry for entry in files if str(entry.get("name", "")).lower().endswith(".py")
     ][:12]
 
     for entry in py_files:
