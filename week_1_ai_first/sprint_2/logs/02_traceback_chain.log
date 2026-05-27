@@ -1,0 +1,9 @@
+2026-05-27 11:14:20 ERROR Worker crashed while processing job id=918
+Traceback (most recent call last):
+  File "worker.py", line 88, in process
+    run_step(step)
+  File "worker.py", line 52, in run_step
+    value = int(payload["count"])
+ValueError: invalid literal for int() with base 10: 'abc'
+2026-05-27 11:14:22 Exception JobFailedException: processing aborted
+2026-05-27 11:14:23 ERROR Worker crashed while processing job id=919

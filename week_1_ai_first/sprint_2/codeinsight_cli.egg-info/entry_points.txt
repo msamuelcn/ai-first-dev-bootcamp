@@ -1,0 +1,2 @@
+[console_scripts]
+codeinsight = code_insight_cli:main

@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: codeinsight-cli
+Version: 0.1.0
+Summary: Code Insight CLI launcher
+Requires-Python: >=3.10

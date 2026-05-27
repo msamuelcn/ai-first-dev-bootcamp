@@ -212,6 +212,7 @@ def _format_summary(summary: dict[str, Any]) -> str:
 
     return "\n".join(
         [
+            f"FILE ANALYSIS SUMMARY",
             f"Project: {summary['root']}",
             f"Total files: {summary['total_files']}",
             f"File types: {type_line}",
