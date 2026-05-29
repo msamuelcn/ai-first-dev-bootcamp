@@ -250,7 +250,12 @@ class StdioFilesystemTransport:
         """Return whether trace output should be emitted for MCP requests."""
         if self._settings and self._settings.env:
             value = self._settings.env.get(self._TRACE_ENV_VAR)
-            if isinstance(value, str) and value.strip().lower() not in {"", "0", "false", "no"}:
+            if isinstance(value, str) and value.strip().lower() not in {
+                "",
+                "0",
+                "false",
+                "no",
+            }:
                 return True
 
         value = os.getenv(self._TRACE_ENV_VAR, "")
