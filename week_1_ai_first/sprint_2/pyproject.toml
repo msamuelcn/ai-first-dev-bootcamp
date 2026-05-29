@@ -7,9 +7,17 @@ name = "codeinsight-cli"
 version = "0.1.0"
 description = "Code Insight CLI launcher"
 requires-python = ">=3.10"
+dependencies = [
+	"mcp>=1.0,<2.0",
+]
 
 [project.scripts]
 codeinsight = "code_insight_cli:main"
 
 [tool.setuptools]
 py-modules = ["code_insight_cli"]
+
+[tool.pytest.ini_options]
+markers = [
+	"integration: marks tests that require live external MCP server communication",
+]

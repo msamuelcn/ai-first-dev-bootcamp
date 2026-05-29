@@ -1,6 +1,6 @@
 # Code Insight CLI
 
-Code Insight CLI is a Python command-line tool for inspecting local projects and files through an MCP-style filesystem client layer.
+Code Insight CLI is a Python command-line tool for inspecting local projects and files through a real MCP filesystem server over stdio.
 
 It is designed for developer workflows such as:
 - project structure analysis
@@ -21,6 +21,7 @@ It is designed for developer workflows such as:
 ### Prerequisites
 
 - Python 3.10+
+- Node.js 18+ (required to run the filesystem MCP server via `npx`)
 
 ### Setup
 
@@ -52,6 +53,20 @@ source .venv/bin/activate
 
 ```bash
 pip install -r requirements.txt
+```
+
+4. Optional: configure MCP root directory (defaults to current directory):
+
+Windows PowerShell:
+
+```powershell
+$env:CODEINSIGHT_MCP_ROOT = "C:/Users/marks/OneDrive/Documents/AIWednesday/GauntletAI"
+```
+
+macOS/Linux:
+
+```bash
+export CODEINSIGHT_MCP_ROOT=/path/to/project
 ```
 
 ## Usage
@@ -130,11 +145,17 @@ python main.py find-errors ../logs/server.log
 
 ## Known Limitations
 
-- Current implementation uses a local filesystem transport adapter for MCP-style operations.
+- MCP operations currently target filesystem tools only.
 - No remote repository integration.
 - Extremely large files may be slow to process.
 - Summaries and explanations are heuristic-based and may miss deeper context.
 - Log scanning uses pattern matching, not full semantic root-cause analysis.
+
+## MCP Proof Notes
+
+- Commands use an external process: `npx -y @modelcontextprotocol/server-filesystem <root>`.
+- During command execution, the CLI initializes an MCP session and calls tools such as `list_directory` and `read_file`.
+- If the external server is unavailable, commands fail with MCP connection errors instead of silently falling back to local in-process file reads.
 
 ## Error Handling
 

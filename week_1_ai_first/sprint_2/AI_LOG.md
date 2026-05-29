@@ -205,4 +205,160 @@ Diagnosed import resolution issue and path/package visibility mismatch for pytes
 ### Actions Taken
 - Updated test import strategy and adjusted setup so test module resolves project package correctly.
 
+---
+## Session 15
+
+### Issue
+Received feedback that the project is not yet MCP-proven, as it relies on a local filesystem adapter rather than demonstrating real MCP server consumption.
+
+```
+Sprint 2 is MCP-shaped, not yet MCP-proven
+
+The curriculum requires “a CLI tool that consumes at least one MCP server.”
+
+The attempt has an MCPClient, MCPTransport, and LocalFilesystemTransport, but its core behavior is local filesystem access through a custom adapter. That is useful as a pedagogical abstraction, but it is not yet strong evidence of real MCP server consumption.
+
+A strict reviewer will ask the Week 1 defense question: “What does the MCP protocol actually do under the hood? Explain it without acronyms.” The current repo does not yet provide enough protocol-level evidence to survive that question.
+```
+
+### Prompt
+
+```
+I have this in my received  review. Can you explain it more? And give examples if possible. What files I should change or modify?
+
+
+Sprint 2 is MCP-shaped, not yet MCP-proven
+
+The curriculum requires “a CLI tool that consumes at least one MCP server.”
+
+The attempt has an MCPClient, MCPTransport, and LocalFilesystemTransport, but its core behavior is local filesystem access through a custom adapter. That is useful as a pedagogical abstraction, but it is not yet strong evidence of real MCP server consumption.
+
+A strict reviewer will ask the Week 1 defense question: “What does the MCP protocol actually do under the hood? Explain it without acronyms.” The current repo does not yet provide enough protocol-level evidence to survive that question.
+```
+
+### AI Output (Summary)
+ - Findings:
+    - I found the project layout; next I’m reading the MCP client and transport implementation to show exactly why the review calls it MCP-shaped.
+    - Confirmed the key gap: the transport currently never talks to an external server process.
+    - I confirmed there is no real MCP dependency configured.
+    - You designed your code to look like an MCP integration, but you have not yet demonstrated real server communication.
+    - Why they said “MCP-shaped, not MCP-proven”
+     - The transport class is local logic, not a server client: filesystem.py:11, filesystem.py:46.
+     - Open/close do nothing, so no external process/session is established: filesystem.py:38.
+     - Factory returns that local transport directly: filesystem.py:176.
+     - All core commands use that same local factory, so all features run without a real server: tree.py:10, summarize.py:9, analyze.py:11, explain.py:11, find_errors.py:11.
+     - Dependencies do not show an MCP SDK/server client package: requirements.txt, pyproject.toml
+     - Your README already admits this limitation: README.md:133.
+     - Current MCP test only checks object creation, not real server tool calls: test_mcp_filesystem.py:9
+
+### Actions Taken
+ - Asked AI to give me examples of how to make it MCP-proven. Also asked for a minimal acceptance checklist to ensure the next iteration is MCP-proven.
+  - AI provided examples of how to implement a real MCP server and client interaction, along with a checklist for MCP-proven status.
+
+---
+## Session 16
+### Prompt
+```
+"If you want, I can next give you a minimal acceptance checklist you can hand to reviewers, with pass/fail criteria for “MCP-proven.”
+Yes please
+```
+
+### AI Output
+```
+Great. Here is a minimal reviewer checklist you can use as a pass/fail gate for MCP-proven.
+
+**MCP-Proven Acceptance Checklist (Pass/Fail)**
+
+1. Real server process is used
+- Pass: CLI starts or connects to an external filesystem server process during command execution.
+- Fail: All file operations happen in local in-process code only.
+
+2. Real request/response exchange is visible
+- Pass: There is observable evidence (debug logs, trace output, or test capture) showing at least one tool request and one structured response.
+- Fail: No evidence of message exchange, only function calls inside the app.
+
+3. At least one core command depends on MCP
+- Pass: At least one required command cannot complete without MCP server communication.
+- Fail: Commands still work fully when MCP is removed because they directly read local files.
+
+4. Connection lifecycle is implemented
+- Pass: Connect, call, and disconnect are all exercised in normal flow.
+- Fail: Open/close are no-ops or never used.
+
+5. Error behavior proves network/process boundary
+- Pass: User-facing errors clearly distinguish:
+  - server unavailable
+  - tool operation failure
+  - invalid user input
+- Fail: Errors are generic or identical to local filesystem exceptions only.
+
+6. Tool coverage matches your claim
+- Pass: You can demonstrate list directory and read file through MCP path at minimum.
+- Fail: Claimed tools exist but are not actually invoked in runtime.
+
+7. Tests verify protocol behavior, not object creation
+- Pass: Automated tests assert successful server-backed call(s) and failure path(s).
+- Fail: Tests only assert client object exists or flags default state.
+
+8. Dependencies and setup are reproducible
+- Pass: Required packages and setup steps for MCP server/client are documented and installable.
+- Fail: No dependency/config evidence for real MCP usage.
+
+9. README explains under-the-hood flow plainly
+- Pass: README explains, in simple language, how the CLI sends a request to a separate server and receives results.
+- Fail: README only says “MCP-style” or “MCP-shaped” with no concrete flow.
+
+10. Demo script can be defended live
+- Pass: You can run one command live and show:
+  - server starts/connects
+  - request sent
+  - response received
+  - user output rendered
+- Fail: Demo only shows final output with no protocol-level proof.
+
+**Quick Reviewer Scorecard**
+- 9-10 pass: Clearly MCP-proven.
+- 7-8 conditional pass: Good, but missing one proof artifact.
+- 0-6 fail: Still MCP-shaped.
+
+**Minimum evidence bundle to submit**
+1. One terminal capture of a successful MCP-backed command.
+2. One terminal capture of server-down failure with friendly error.
+3. One automated test proving real MCP call path.
+4. One README section “How it works under the hood” in plain language.
+
+If you want, I can draft a one-page defense script you can read in under 2 minutes during review.
+```
+### Actions Taken
+ - I started to ask for checklist # 1 and # 2, but I think I will need to implement the MCP server and client first to get those captures. So I will hold off on asking for the defense script until I have those pieces in place.
+
+---
+## Session 17
+### Prompt
+```
+Example of how I can pass. What specific files I should add/edit. WHat server I should set up
+
+1. Real server process is used
+
+- Pass: CLI starts or connects to an external filesystem server process during command execution.
+- Fail: All file operations happen in local in-process code only.
+
+```
+
+### AI Output
+To pass the "Real server process is used" criterion, you will need to implement a simple MCP server that can handle filesystem operations, and modify your CLI to connect to this server instead of using local in-process code.
+
+Recommended Server To Set Up
+ - Use the official filesystem MCP server package: @modelcontextprotocol/server-filesystem.
+ - Run it as an external process from your CLI using npx (stdio mode).
+ - Give it one allowed root folder (your project root) so reviewers can see controlled access.
+
+## What I did
+1. Added a real stdio MCP transport that launches and calls the external filesystem server.
+2. Made real MCP client the default for commands (instead of local in-process transport).
+3. Exported new MCP factories/transports.
+4. Added runtime dependency and test marker config.
+5. Updated MCP tests for real-server configuration and optional live integration.
+6. Updated README with setup and under-the-hood explanation.
+
 

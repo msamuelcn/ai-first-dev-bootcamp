@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from mcp.client import MCPConnectionError, MCPOperationError
-from mcp.filesystem import create_local_filesystem_client
+from mcp.filesystem import create_filesystem_client
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
@@ -23,7 +23,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 def handle(args: argparse.Namespace) -> None:
     """Render a directory tree using the filesystem MCP client."""
     try:
-        client = create_local_filesystem_client()
+        client = create_filesystem_client()
         with client:
             listing = client.list_directory(args.path)
         print(_render_tree(listing))

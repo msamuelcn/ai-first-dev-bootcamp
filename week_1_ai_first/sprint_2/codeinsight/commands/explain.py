@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 
 from mcp.client import MCPConnectionError, MCPOperationError
-from mcp.filesystem import create_local_filesystem_client
+from mcp.filesystem import create_filesystem_client
 
 _SUPPORTED_CODE_EXTENSIONS = {
     ".py",
@@ -49,7 +49,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 def handle(args: argparse.Namespace) -> None:
     """Explain code structure and flow for a source file read via MCP."""
     try:
-        client = create_local_filesystem_client()
+        client = create_filesystem_client()
         with client:
             payload = client.read_file(args.file)
 

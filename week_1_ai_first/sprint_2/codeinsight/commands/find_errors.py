@@ -8,7 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 from mcp.client import MCPConnectionError, MCPOperationError
-from mcp.filesystem import create_local_filesystem_client
+from mcp.filesystem import create_filesystem_client
 
 _ERROR_RE = re.compile(r"\berror\b", re.IGNORECASE)
 _WARNING_RE = re.compile(r"\bwarning\b", re.IGNORECASE)
@@ -29,7 +29,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 def handle(args: argparse.Namespace) -> None:
     """Scan a log file for common error patterns using MCP read_file."""
     try:
-        client = create_local_filesystem_client()
+        client = create_filesystem_client()
         with client:
             payload = client.read_file(args.path)
 

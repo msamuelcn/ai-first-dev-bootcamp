@@ -8,7 +8,13 @@ from .client import (
     MCPOperationError,
     MCPTransport,
 )
-from .filesystem import FilesystemMCPClient
+from .filesystem import (
+    FilesystemMCPClient,
+    LocalFilesystemTransport,
+    StdioFilesystemTransport,
+    create_filesystem_client,
+    create_local_filesystem_client,
+)
 
 __all__ = [
     "MCPClient",
@@ -18,4 +24,8 @@ __all__ = [
     "MCPOperationError",
     "MCPTransport",
     "FilesystemMCPClient",
+    "LocalFilesystemTransport",
+    "StdioFilesystemTransport",
+    "create_filesystem_client",
+    "create_local_filesystem_client",
 ]
