@@ -378,7 +378,9 @@ class FilesystemMCPClient(MCPClient):
             extension = str(raw.get("extension") or Path(path).suffix.lower())
             is_binary = bool(raw.get("is_binary", False))
             size_bytes = int(raw.get("size_bytes", len(content.encode("utf-8"))))
-            line_count = int(raw.get("line_count", content.count("\n") + (1 if content else 0)))
+            line_count = int(
+                raw.get("line_count", content.count("\n") + (1 if content else 0))
+            )
             return {
                 "path": str(raw.get("path") or resolved_path),
                 "content": content,
