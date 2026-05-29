@@ -184,3 +184,52 @@ __pycache__/
 # Ignore virtual environment
 .venv/
 ```
+
+---
+## Session 12
+### Issue Encountered
+```
+ImportError while importing test module 'C:\Users\marks\OneDrive\Documents\AIWednesday\GauntletAI\week_1_ai_first\sprint_1\tests\test_workouts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\marks\AppData\Local\Programs\Python\Python312\Lib\importlib_init_.py:90: in import_module
+return _bootstrap._gcd_import(name[level:], package, level)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_workouts.py:3: in <module>
+import app.main as main_module
+E ModuleNotFoundError: No module named 'app'
+============================================= short test summary info =============================================
+ERROR tests/test_workouts.py
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+================================================ 1 error in 5.38s =================================================
+```
+
+### Prompt:
+```
+I received this error.
+
+ImportError while importing test module 'C:\Users\marks\OneDrive\Documents\AIWednesday\GauntletAI\week_1_ai_first\sprint_1\tests\test_workouts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\marks\AppData\Local\Programs\Python\Python312\Lib\importlib_init_.py:90: in import_module
+return _bootstrap._gcd_import(name[level:], package, level)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_workouts.py:3: in <module>
+import app.main as main_module
+E ModuleNotFoundError: No module named 'app'
+============================================= short test summary info =============================================
+ERROR tests/test_workouts.py
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+================================================ 1 error in 5.38s =================================================
+
+What I should change?
+```
+
+### AI Output (Summary)
+Root cause is import resolution during pytest collection. The AI is applying a reliable fix by making `app` an explicit package and adding one small path bootstrap in test setup so it works no matter where pytest is launched from.
+
+### Actions Taken
+- Added `__init__.py` to `app/` and `tests/` to make them explicit packages.
+- Added `conftest.py` in `tests/` to adjust `sys.path` for pytest.
+- Tested that `pytest tests/` now runs without import errors.
+
