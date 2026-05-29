@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-import week_1_ai_first.sprint_1.app.main as main_module
+import app.main as main_module
 
 client = TestClient(main_module.app)
 
