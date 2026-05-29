@@ -32,6 +32,36 @@ def test_external_mcp_client_uses_real_server_command():
     assert "@modelcontextprotocol/server-filesystem" in client._settings.server_command
 
 
+def test_external_mcp_connection_failure_is_distinct(monkeypatch):
+    transport = StdioFilesystemTransport()
+    settings = MCPConnectionSettings(
+        server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
+    )
+    client = FilesystemMCPClient(settings, transport)
+
+    def fake_run(*args, **kwargs):
+        return SimpleNamespace(
+            stdout="",
+            stderr="spawn ENOENT",
+            returncode=1,
+        )
+
+    monkeypatch.setattr(
+        "codeinsight.mcp.filesystem.shutil.which",
+        lambda command: "C:/mock/npx.cmd",
+    )
+    monkeypatch.setattr(
+        "codeinsight.mcp.filesystem.subprocess.run",
+        fake_run,
+    )
+
+    with pytest.raises(Exception) as exc_info:
+        with client:
+            client.list_directory(".")
+
+    assert "Unable to connect to MCP server" in str(exc_info.value)
+
+
 def test_stdio_transport_emits_trace_for_request_and_response(monkeypatch, capsys):
     transport = StdioFilesystemTransport()
     settings = MCPConnectionSettings(
@@ -44,6 +74,7 @@ def test_stdio_transport_emits_trace_for_request_and_response(monkeypatch, capsy
         return SimpleNamespace(
             stdout='{"ok": true, "result": {"path": ".", "type": "directory", "entries": []}}',
             stderr="",
+            returncode=0,
         )
 
     monkeypatch.setattr(
@@ -77,3 +108,20 @@ def test_external_mcp_list_directory_integration():
     assert isinstance(payload, dict)
     assert payload.get("type") == "directory"
     assert isinstance(payload.get("entries"), list)
+
+
+@pytest.mark.integration
+def test_external_mcp_read_file_integration():
+    if os.getenv("RUN_MCP_INTEGRATION") != "1":
+        pytest.skip("Set RUN_MCP_INTEGRATION=1 to run live MCP integration tests.")
+
+    root = Path(__file__).resolve().parents[1]
+    target = root / "codeinsight" / "main.py"
+    client = create_filesystem_client(root_path=str(root))
+
+    with client:
+        payload = client.read_file(str(target))
+
+    assert isinstance(payload, dict)
+    assert payload.get("is_binary") is False
+    assert "Entrypoint for the Code Insight CLI" in str(payload.get("content", ""))

@@ -5,12 +5,14 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
-from .client import MCPClient, MCPConnectionSettings
+from .client import MCPClient, MCPConnectionError, MCPConnectionSettings
 
 
 class LocalFilesystemTransport:
@@ -165,7 +167,13 @@ class StdioFilesystemTransport:
     _NOT_FOUND_HINTS = ("not found", "no such file", "enoent")
     _NOT_DIRECTORY_HINTS = ("not a directory", "directory expected")
     _IS_DIRECTORY_HINTS = ("is a directory", "expected file")
-    _PERMISSION_HINTS = ("permission denied", "eacces", "operation not permitted")
+    _PERMISSION_HINTS = (
+        "permission denied",
+        "eacces",
+        "operation not permitted",
+        "access denied",
+        "outside allowed directories",
+    )
 
     def __init__(self) -> None:
         self._settings: MCPConnectionSettings | None = None
@@ -174,6 +182,14 @@ class StdioFilesystemTransport:
         """Store connection settings; the server is launched on tool execution."""
         if not settings.server_command:
             raise ValueError("MCP server command is required.")
+
+        command = settings.server_command[0]
+        if not shutil.which(command):
+            raise OSError(
+                f"MCP server command not found: {command}. "
+                "Ensure Node.js/npm tooling is installed and available in PATH."
+            )
+
         self._settings = settings
 
     def close(self) -> None:
@@ -223,8 +239,16 @@ class StdioFilesystemTransport:
             raise OSError(f"Unable to start helper process: {exc}") from exc
 
         output = process.stdout.strip()
+        stderr = process.stderr.strip()
+
+        if process.returncode != 0 and self._looks_connection_failure(stderr):
+            raise MCPConnectionError(
+                "Unable to connect to MCP server process. "
+                f"Command failed: {' '.join(self._settings.server_command)}"
+            )
+
         if not output:
-            message = process.stderr.strip() or "MCP helper produced no output."
+            message = stderr or "MCP helper produced no output."
             self._raise_mapped_error(RuntimeError(message), arguments)
 
         try:
@@ -238,6 +262,11 @@ class StdioFilesystemTransport:
 
         if not response.get("ok", False):
             error_message = str(response.get("error", "Unknown MCP helper error"))
+            if self._looks_connection_failure(error_message):
+                raise MCPConnectionError(
+                    "Unable to connect to MCP server. "
+                    "Please ensure the server is available and try again."
+                )
             self._raise_mapped_error(RuntimeError(error_message), arguments)
 
         result_payload = response.get("result")
@@ -260,6 +289,28 @@ class StdioFilesystemTransport:
 
         value = os.getenv(self._TRACE_ENV_VAR, "")
         return value.strip().lower() not in {"", "0", "false", "no"}
+
+    @staticmethod
+    def _looks_connection_failure(message: str) -> bool:
+        """Return true when a message indicates server/process startup failure."""
+        lowered = str(message).lower()
+        connection_hints = (
+            "mcp sdk import failed",
+            "cannot find module",
+            "spawn",
+            "enoent",
+            "executable",
+            "not recognized as an internal or external command",
+            "command not found",
+            "failed to start",
+            "stdio",
+            "initialize",
+        )
+
+        if "open '" in lowered:
+            return False
+
+        return any(hint in lowered for hint in connection_hints)
 
     @staticmethod
     def _emit_trace(kind: str, payload: Any) -> None:
@@ -422,6 +473,9 @@ class FilesystemMCPClient(MCPClient):
 
     def list_directory(self, path: str) -> Any:
         """Return recursive directory entries for the provided path."""
+        if not isinstance(path, str) or not path.strip():
+            raise ValueError("Invalid path format")
+
         root_path = str(Path(path).expanduser().resolve(strict=False))
         entries = self._collect_directory_entries(root_path, depth=0)
         return {
@@ -432,6 +486,9 @@ class FilesystemMCPClient(MCPClient):
 
     def read_file(self, path: str) -> Any:
         """Return file contents for the provided path."""
+        if not isinstance(path, str) or not path.strip():
+            raise ValueError("Invalid path format")
+
         resolved_path = str(Path(path).expanduser().resolve(strict=False))
         raw = self.call_tool("read_file", {"path": resolved_path})
 
@@ -596,15 +653,32 @@ def create_filesystem_client(root_path: str | None = None) -> FilesystemMCPClien
     resolved_root = Path(
         root_path or os.getenv("CODEINSIGHT_MCP_ROOT") or Path.cwd()
     ).resolve()
-    settings = MCPConnectionSettings(
-        server_command=[
+
+    override_command = os.getenv("CODEINSIGHT_MCP_SERVER_COMMAND", "").strip()
+    if override_command:
+        server_command = shlex.split(override_command, posix=(os.name != "nt"))
+        server_command = [
+            str(resolved_root) if token == "{root}" else token
+            for token in server_command
+        ]
+    else:
+        server_command = [
             "npx",
             "-y",
             "@modelcontextprotocol/server-filesystem",
             str(resolved_root),
-        ],
+        ]
+
+    timeout_raw = os.getenv("CODEINSIGHT_MCP_TIMEOUT_SECONDS", "30")
+    try:
+        timeout_seconds = max(5.0, float(timeout_raw))
+    except ValueError:
+        timeout_seconds = 30.0
+
+    settings = MCPConnectionSettings(
+        server_command=server_command,
         cwd=str(resolved_root),
-        timeout_seconds=12.0,
+        timeout_seconds=timeout_seconds,
     )
     return FilesystemMCPClient(settings, StdioFilesystemTransport())
 

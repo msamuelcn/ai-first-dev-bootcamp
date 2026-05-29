@@ -386,3 +386,27 @@ Documented and tested a core command dependency on MCP by forcing summarize to f
 - Added a regression test in `tests/test_cli.py` that monkeypatches the MCP client factory to raise `MCPConnectionError`.
 - Verified the summarize command prints the MCP connection error when the server cannot be reached.
 - Kept the command flow dependent on the external filesystem server for normal execution.
+
+---
+## Session 20
+### Prompt
+"Apply suggestions for criteria 5-10 (error boundary behavior, tool coverage, protocol tests, reproducible setup, README under-the-hood explanation, and live demo defense)."
+
+### AI Output (Summary)
+Implemented and validated checklist items 5-10 with explicit error-boundary tests, protocol-level MCP tests for list/read tools, reproducible environment controls, clear README walkthrough, and live demo commands.
+
+### Actions Taken
+- Added explicit error-boundary tests in `tests/test_cli.py` for:
+  - server unavailable
+  - tool operation failure
+  - invalid user input
+- Added protocol-level MCP tests in `tests/test_mcp_filesystem.py`:
+  - read_file integration test
+  - distinct connection-failure mapping test
+- Improved transport behavior in `codeinsight/mcp/filesystem.py`:
+  - detect missing server command during connect
+  - classify startup failures as MCP connection errors
+  - support `CODEINSIGHT_MCP_SERVER_COMMAND` override for reproducible failure demo
+- Expanded `README.md` with:
+  - plain-language "Under The Hood" section
+  - step-by-step live defense demo commands and expected evidence

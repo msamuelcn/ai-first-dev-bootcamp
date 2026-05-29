@@ -159,6 +159,54 @@ python main.py find-errors ../logs/server.log
 - Set `CODEINSIGHT_MCP_TRACE=1` to print a visible request/response trace to stderr for reviewer evidence.
 - Core commands such as `summarize` and `tree` depend on the MCP server for successful execution.
 
+## Under The Hood
+
+When you run a command like `summarize`, this project does the following:
+
+1. Builds a request with a tool name (`read_file`) and arguments (`path`).
+2. Starts a separate filesystem server process using `npx`.
+3. Sends the request to that process over standard input/output.
+4. Receives a structured response payload.
+5. Converts that response into CLI output and user-friendly errors.
+
+This means core commands do not read files directly in-process for normal execution.
+
+## Live Defense Demo
+
+Run these commands in PowerShell from `week_1_ai_first/sprint_2`:
+
+1. Successful server-backed request/response exchange:
+
+```powershell
+Set-Location .\codeinsight
+$env:CODEINSIGHT_MCP_TRACE='1'
+python main.py summarize .\main.py
+Remove-Item Env:CODEINSIGHT_MCP_TRACE
+```
+
+Expected evidence:
+- a `[codeinsight-mcp] request:` line
+- a `[codeinsight-mcp] response:` line
+- summarized file output
+
+2. Server unavailable boundary (distinct error):
+
+```powershell
+Set-Location ..
+$env:CODEINSIGHT_MCP_SERVER_COMMAND='not-a-real-command {root}'
+python .\codeinsight\main.py summarize .\README.md
+Remove-Item Env:CODEINSIGHT_MCP_SERVER_COMMAND
+```
+
+Expected evidence:
+- `Error: Unable to connect to MCP server...`
+
+3. Protocol behavior tests:
+
+```powershell
+pytest tests/test_cli.py tests/test_mcp_filesystem.py
+```
+
 ## Error Handling
 
 The CLI is designed to fail gracefully with actionable messages for:

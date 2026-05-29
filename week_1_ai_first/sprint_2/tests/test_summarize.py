@@ -7,6 +7,8 @@ ROOT_TEST_FOLDER = "codeinsight/"
 
 def run_cli(args, env=None):
     run_env = os.environ.copy()
+    run_env.pop("CODEINSIGHT_MCP_SERVER_COMMAND", None)
+    run_env.setdefault("CODEINSIGHT_MCP_TIMEOUT_SECONDS", "45")
     if env:
         run_env.update(env)
 

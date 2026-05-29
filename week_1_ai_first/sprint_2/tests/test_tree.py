@@ -1,14 +1,20 @@
 import subprocess
 import sys
+import os
 
 ROOT_TEST_FOLDER = "codeinsight/"
 
 
 def run_cli(args):
+    run_env = os.environ.copy()
+    run_env.pop("CODEINSIGHT_MCP_SERVER_COMMAND", None)
+    run_env.setdefault("CODEINSIGHT_MCP_TIMEOUT_SECONDS", "45")
+
     return subprocess.run(
         [sys.executable, ROOT_TEST_FOLDER + "main.py"] + args,
         capture_output=True,
         text=True,
+        env=run_env,
     )
 
 
