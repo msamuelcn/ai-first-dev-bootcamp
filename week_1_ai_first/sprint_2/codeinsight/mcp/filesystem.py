@@ -161,6 +161,7 @@ class LocalFilesystemTransport:
 class StdioFilesystemTransport:
     """MCP stdio transport that launches an external filesystem server process."""
 
+    _TRACE_ENV_VAR = "CODEINSIGHT_MCP_TRACE"
     _NOT_FOUND_HINTS = ("not found", "no such file", "enoent")
     _NOT_DIRECTORY_HINTS = ("not a directory", "directory expected")
     _IS_DIRECTORY_HINTS = ("is a directory", "expected file")
@@ -198,6 +199,10 @@ class StdioFilesystemTransport:
             helper_env.update(self._settings.env)
 
         helper_cwd = str(Path(__file__).resolve().parents[2])
+        trace_enabled = self._trace_enabled()
+
+        if trace_enabled:
+            self._emit_trace("request", payload)
 
         try:
             process = subprocess.run(
@@ -228,11 +233,36 @@ class StdioFilesystemTransport:
             message = process.stderr.strip() or output[:200]
             raise RuntimeError(f"Invalid MCP helper response: {message}") from exc
 
+        if trace_enabled:
+            self._emit_trace("response", response)
+
         if not response.get("ok", False):
             error_message = str(response.get("error", "Unknown MCP helper error"))
             self._raise_mapped_error(RuntimeError(error_message), arguments)
 
-        return self._normalize_mcp_result(response.get("result"))
+        result_payload = response.get("result")
+        if tool_name in {"read_file", "list_directory"}:
+            self._raise_mapped_error_from_result(tool_name, result_payload, arguments)
+
+        return self._normalize_mcp_result(result_payload)
+
+    def _trace_enabled(self) -> bool:
+        """Return whether trace output should be emitted for MCP requests."""
+        if self._settings and self._settings.env:
+            value = self._settings.env.get(self._TRACE_ENV_VAR)
+            if isinstance(value, str) and value.strip().lower() not in {"", "0", "false", "no"}:
+                return True
+
+        value = os.getenv(self._TRACE_ENV_VAR, "")
+        return value.strip().lower() not in {"", "0", "false", "no"}
+
+    @staticmethod
+    def _emit_trace(kind: str, payload: Any) -> None:
+        """Emit a compact JSON trace line to stderr for debugging and review evidence."""
+        print(
+            f"[codeinsight-mcp] {kind}: {json.dumps(payload, ensure_ascii=True, default=str)}",
+            file=sys.stderr,
+        )
 
     @staticmethod
     def _build_helper_command() -> list[str]:
@@ -326,6 +356,33 @@ class StdioFilesystemTransport:
             raise ValueError("Invalid path format") from exc
 
         raise RuntimeError(message) from exc
+
+    def _raise_mapped_error_from_result(
+        self, tool_name: str, result: Any, arguments: dict[str, Any]
+    ) -> None:
+        """Convert server-returned error text into the expected file/path exceptions."""
+        if isinstance(result, str):
+            lowered = result.lower()
+            if any(hint in lowered for hint in self._NOT_FOUND_HINTS):
+                raise FileNotFoundError(str(arguments.get("path", "")))
+            if any(hint in lowered for hint in self._NOT_DIRECTORY_HINTS):
+                raise NotADirectoryError(str(arguments.get("path", "")))
+            if any(hint in lowered for hint in self._IS_DIRECTORY_HINTS):
+                raise IsADirectoryError(str(arguments.get("path", "")))
+            if any(hint in lowered for hint in self._PERMISSION_HINTS):
+                raise PermissionError(str(arguments.get("path", "")))
+
+        if isinstance(result, dict):
+            error_message = str(result.get("error", "")).lower()
+            if error_message:
+                if any(hint in error_message for hint in self._NOT_FOUND_HINTS):
+                    raise FileNotFoundError(str(arguments.get("path", "")))
+                if any(hint in error_message for hint in self._NOT_DIRECTORY_HINTS):
+                    raise NotADirectoryError(str(arguments.get("path", "")))
+                if any(hint in error_message for hint in self._IS_DIRECTORY_HINTS):
+                    raise IsADirectoryError(str(arguments.get("path", "")))
+                if any(hint in error_message for hint in self._PERMISSION_HINTS):
+                    raise PermissionError(str(arguments.get("path", "")))
 
     @staticmethod
     def _normalize_mcp_result(result: Any) -> Any:

@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from mcp.client import MCPConnectionError, MCPOperationError
-from mcp.filesystem import create_filesystem_client
+from codeinsight.mcp.client import MCPConnectionError, MCPOperationError
+from codeinsight.mcp.filesystem import create_filesystem_client
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:

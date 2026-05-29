@@ -7,8 +7,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from mcp.client import MCPConnectionError, MCPOperationError
-from mcp.filesystem import create_filesystem_client
+from codeinsight.mcp.client import MCPConnectionError, MCPOperationError
+from codeinsight.mcp.filesystem import create_filesystem_client
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:

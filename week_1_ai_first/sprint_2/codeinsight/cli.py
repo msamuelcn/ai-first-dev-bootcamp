@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from typing import Sequence
 
-from commands import analyze, explain, find_errors, summarize, tree
+from codeinsight.commands import analyze, explain, find_errors, summarize, tree
 
 
 def build_parser() -> argparse.ArgumentParser:

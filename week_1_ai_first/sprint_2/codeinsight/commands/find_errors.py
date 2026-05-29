@@ -7,8 +7,8 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from mcp.client import MCPConnectionError, MCPOperationError
-from mcp.filesystem import create_filesystem_client
+from codeinsight.mcp.client import MCPConnectionError, MCPOperationError
+from codeinsight.mcp.filesystem import create_filesystem_client
 
 _ERROR_RE = re.compile(r"\berror\b", re.IGNORECASE)
 _WARNING_RE = re.compile(r"\bwarning\b", re.IGNORECASE)

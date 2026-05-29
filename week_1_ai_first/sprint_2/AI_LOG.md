@@ -358,7 +358,31 @@ Recommended Server To Set Up
 2. Made real MCP client the default for commands (instead of local in-process transport).
 3. Exported new MCP factories/transports.
 4. Added runtime dependency and test marker config.
-5. Updated MCP tests for real-server configuration and optional live integration.
-6. Updated README with setup and under-the-hood explanation.
 
+---
 
+## Session 18
+### Prompt
+"Apply the suggestion for fix to pass: Real request/response exchange is visible."
+
+### AI Output (Summary)
+Added opt-in MCP trace output so a terminal capture shows both the tool request and the structured response without changing normal CLI output.
+
+### Actions Taken
+- Added `CODEINSIGHT_MCP_TRACE=1` support to the stdio MCP transport.
+- Emitted request and response trace lines to stderr for reviewer evidence.
+- Added a regression test that captures trace output for one MCP tool call.
+- Verified a live run of `python main.py summarize main.py` prints both trace lines and the final summary.
+
+---
+## Session 19
+### Prompt
+"Apply the suggestion for fix to pass: At least one core command depends on MCP."
+
+### AI Output (Summary)
+Documented and tested a core command dependency on MCP by forcing summarize to fail when the MCP connection setup is unavailable, confirming there is no local fallback path.
+
+### Actions Taken
+- Added a regression test in `tests/test_cli.py` that monkeypatches the MCP client factory to raise `MCPConnectionError`.
+- Verified the summarize command prints the MCP connection error when the server cannot be reached.
+- Kept the command flow dependent on the external filesystem server for normal execution.

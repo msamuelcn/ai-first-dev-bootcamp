@@ -7,8 +7,8 @@ import ast
 import re
 from pathlib import Path
 
-from mcp.client import MCPConnectionError, MCPOperationError
-from mcp.filesystem import create_filesystem_client
+from codeinsight.mcp.client import MCPConnectionError, MCPOperationError
+from codeinsight.mcp.filesystem import create_filesystem_client
 
 _SUPPORTED_CODE_EXTENSIONS = {
     ".py",

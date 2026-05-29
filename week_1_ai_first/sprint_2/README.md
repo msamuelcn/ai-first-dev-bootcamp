@@ -156,6 +156,8 @@ python main.py find-errors ../logs/server.log
 - Commands use an external process: `npx -y @modelcontextprotocol/server-filesystem <root>`.
 - During command execution, the CLI initializes an MCP session and calls tools such as `list_directory` and `read_file`.
 - If the external server is unavailable, commands fail with MCP connection errors instead of silently falling back to local in-process file reads.
+- Set `CODEINSIGHT_MCP_TRACE=1` to print a visible request/response trace to stderr for reviewer evidence.
+- Core commands such as `summarize` and `tree` depend on the MCP server for successful execution.
 
 ## Error Handling
 
